@@ -28,7 +28,17 @@ const getContactById = async (contactId) => {
   return contact;
 };
 
-const removeContact = async (contactId) => {};
+const removeContact = async (contactId) => {
+  const allContactsList = await listContacts();
+  const idx = allContactsList.findIndex((contact) => contact.id === contactId);
+  if (idx === -1) {
+    return false;
+  } else {
+    allContactsList.splice(idx, 1);
+    await saveContacts(allContactsList);
+    return true;
+  }
+};
 
 const addContact = async (body) => {
   const allContactsList = await listContacts();
@@ -37,7 +47,18 @@ const addContact = async (body) => {
   return body;
 };
 
-const updateContact = async (contactId, body) => {};
+const updateContact = async (contactId, body) => {
+  const allContactsList = await listContacts();
+  const idx = allContactsList.findIndex((contact) => contact.id === contactId);
+  if (idx === -1) {
+    return false;
+  } else {
+    const newContact = { ...allContactsList[idx], ...body };
+    allContactsList.splice(idx, 1, newContact);
+    await saveContacts(allContactsList);
+    return newContact;
+  }
+};
 
 module.exports = {
   listContacts,
