@@ -1,5 +1,4 @@
 const express = require("express");
-const { v4: uuidv4 } = require("uuid");
 
 //
 const {
@@ -10,7 +9,7 @@ const {
   updateContact,
 } = require("../../models/contacts");
 
-const { filterContact, validateContact } = require("../../tools/validation");
+const { validateContact } = require("../../tools/validation");
 
 const router = express.Router();
 
@@ -32,14 +31,13 @@ router.get("/:contactId", async (req, res, next) => {
 router.post("/", async (req, res, next) => {
   const { name, email, phone } = req.body;
 
-  const filteredContact = filterContact({ name, email, phone });
-
-  const { error } = validateContact(filteredContact);
+  const { error } = validateContact({ name, email, phone });
+  console.log(error);
 
   if (error) {
     res.status(400).json({ message: "missing required name field" });
   } else {
-    const addedContact = await addContact({ id: uuidv4(), name, email, phone });
+    const addedContact = await addContact({ name, email, phone });
 
     res.status(201).json(addedContact);
   }
@@ -56,9 +54,7 @@ router.put("/:contactId", async (req, res, next) => {
   const id = req.params.contactId;
   const body = req.body;
 
-  const filteredContact = filterContact(body);
-
-  const { error } = validateContact(filteredContact);
+  const { error } = validateContact(body);
 
   if (error) {
     res.status(400).json({ message: "missing fields" });

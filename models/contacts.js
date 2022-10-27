@@ -1,4 +1,5 @@
 const fs = require("fs/promises");
+const { v4: uuidv4 } = require("uuid");
 
 const listContacts = async () => {
   try {
@@ -42,7 +43,7 @@ const removeContact = async (contactId) => {
 
 const addContact = async (body) => {
   const allContactsList = await listContacts();
-  allContactsList.push(body);
+  allContactsList.push({ id: uuidv4(), ...body });
   await saveContacts(allContactsList);
   return body;
 };
