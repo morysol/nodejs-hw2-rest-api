@@ -33,8 +33,7 @@ router.get("/:contactId", async (req, res, next) => {
 });
 
 router.post("/", middlewareValidateContact, async (req, res, next) => {
-  const { body } = req;
-  const addedContact = await addContact(body);
+  const addedContact = await addContact(req.body);
   res.status(201).json(addedContact);
 });
 
@@ -49,9 +48,8 @@ router.delete("/:contactId", async (req, res, next) => {
 
 router.put("/:contactId", middlewareValidateContact, async (req, res, next) => {
   const id = req.params.contactId;
-  const { body } = req;
 
-  const isUpdated = await updateContact(id, body);
+  const isUpdated = await updateContact(id, req.body);
   if (isUpdated) {
     res.status(200).json(isUpdated);
   } else {
