@@ -1,13 +1,27 @@
-const schema = require("./schema");
-
-function validateContact(req, res, next) {
-  const { error } = schema.validate(req.body);
-
-  if (error) {
-    next(res.status(400).json({ message: "missing fields" }));
-  } else {
-    next();
-  }
+function validateContact(schema) {
+  return function (req, res, next) {
+    const { name, phone, email, favorite } = req.body;
+    const { error } = schema.validate({ name, phone, email, favorite });
+    if (error) {
+      error.status = 400;
+      next(error);
+    } else {
+      next();
+    }
+  };
 }
 
-module.exports = validateContact;
+function validateStatus(schema) {
+  return function (req, res, next) {
+    const { favorite } = req.body;
+    const { error } = schema.validate({ favorite });
+    if (error) {
+      error.status = 400;
+      next(error);
+    } else {
+      next();
+    }
+  };
+}
+
+module.exports = { validateContact, validateStatus };
