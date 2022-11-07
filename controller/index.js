@@ -3,13 +3,22 @@ const service = require("../service");
 const get = async (req, res, next) => {
   try {
     const results = await service.getAllcontacts();
-    res.json({
-      status: "success",
-      code: 200,
-      data: {
-        contacts: results,
-      },
-    });
+    if (results) {
+      res.json({
+        status: "success",
+        code: 200,
+        data: {
+          contacts: results,
+        },
+      });
+    } else {
+      res.status(404).json({
+        status: "error",
+        code: 404,
+        message: `Nothing found`,
+        data: "Not Found",
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -29,7 +38,7 @@ const getById = async (req, res, next) => {
       res.status(404).json({
         status: "error",
         code: 404,
-        message: `Not found task id: ${contactId}`,
+        message: `Not found contact id: ${contactId}`,
         data: "Not Found",
       });
     }
@@ -57,7 +66,7 @@ const remove = async (req, res, next) => {
   try {
     const { contactId } = req.params;
     const result = await service.removeOneContact(contactId);
-    if (result.deletedCount === 1) {
+    if (result) {
       res.json({
         status: "success",
         code: 200,
@@ -80,7 +89,7 @@ const update = async (req, res, next) => {
   try {
     const { contactId } = req.params;
     const result = await service.updateOneContact(contactId, req.body);
-    if (result.modifiedCount > 0) {
+    if (result) {
       res.json({
         status: "success",
         code: 200,
@@ -102,21 +111,8 @@ const update = async (req, res, next) => {
 const updateFavorite = async (req, res, next) => {
   try {
     const { contactId } = req.params;
-
-    if (!req.body) {
-      res.status(400).json({
-        status: "error",
-        code: 400,
-        message: "missing field favorite",
-        data: "missing required data",
-      });
-    }
-
-    const result = await service.updateOneContact(contactId, req.body);
-    console.log(contactId);
-    console.log(req.body);
-
-    if (result.modifiedCount > 0) {
+    const result = await service.updateStatusContact(contactId, req.body);
+    if (result) {
       res.json({
         status: "success",
         code: 200,
@@ -126,7 +122,7 @@ const updateFavorite = async (req, res, next) => {
       res.status(404).json({
         status: "error",
         code: 404,
-        message: `qqqqqq Not found contact id: ${contactId}`,
+        message: `Not found contact id: ${contactId}`,
         data: "Not Found",
       });
     }
