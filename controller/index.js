@@ -10,14 +10,14 @@ const get = async (req, res, next) => {
         contacts: results,
       },
     });
-  } catch (e) {
-    next(e);
+  } catch (error) {
+    next(error);
   }
 };
 
 const getById = async (req, res, next) => {
-  const { contactId } = req.params;
   try {
+    const { contactId } = req.params;
     const result = await service.getContactsById(contactId);
     if (result) {
       res.json({
@@ -33,8 +33,8 @@ const getById = async (req, res, next) => {
         data: "Not Found",
       });
     }
-  } catch (e) {
-    next(e);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -48,14 +48,14 @@ const add = async (req, res, next) => {
         data: { contact: result },
       });
     }
-  } catch (e) {
-    next(e);
+  } catch (error) {
+    next(error);
   }
 };
 
 const remove = async (req, res, next) => {
-  const { contactId } = req.params;
   try {
+    const { contactId } = req.params;
     const result = await service.removeOneContact(contactId);
     if (result.deletedCount === 1) {
       res.json({
@@ -71,16 +71,16 @@ const remove = async (req, res, next) => {
         data: "Not Found",
       });
     }
-  } catch (e) {
-    next(e);
+  } catch (error) {
+    next(error);
   }
 };
 
 const update = async (req, res, next) => {
-  const { contactId } = req.params;
   try {
+    const { contactId } = req.params;
     const result = await service.updateOneContact(contactId, req.body);
-    if (result.modifiedCount === 1 || result.matchedCount > 0) {
+    if (result.modifiedCount > 0) {
       res.json({
         status: "success",
         code: 200,
@@ -94,26 +94,29 @@ const update = async (req, res, next) => {
         data: "Not Found",
       });
     }
-  } catch (e) {
-    next(e);
+  } catch (error) {
+    next(error);
   }
 };
 
 const updateFavorite = async (req, res, next) => {
-  const { contactId } = req.params;
-
-  if (!req.body) {
-    res.status(400).json({
-      status: "error",
-      code: 400,
-      message: "missing field favorite",
-      data: "missing required data",
-    });
-  }
-
   try {
+    const { contactId } = req.params;
+
+    if (!req.body) {
+      res.status(400).json({
+        status: "error",
+        code: 400,
+        message: "missing field favorite",
+        data: "missing required data",
+      });
+    }
+
     const result = await service.updateOneContact(contactId, req.body);
-    if (result.modifiedCount === 1 || result.matchedCount > 0) {
+    console.log(contactId);
+    console.log(req.body);
+
+    if (result.modifiedCount > 0) {
       res.json({
         status: "success",
         code: 200,
@@ -123,12 +126,12 @@ const updateFavorite = async (req, res, next) => {
       res.status(404).json({
         status: "error",
         code: 404,
-        message: `Not found contact id: ${contactId}`,
+        message: `qqqqqq Not found contact id: ${contactId}`,
         data: "Not Found",
       });
     }
-  } catch (e) {
-    next(e);
+  } catch (error) {
+    next(error);
   }
 };
 

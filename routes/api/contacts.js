@@ -2,8 +2,8 @@ const express = require("express");
 
 const controller = require("../../controller");
 
-const { schemaContact, schemaStatus } = require("../../tools/schema");
-const { validateContact, validateStatus } = require("../../tools/validation");
+const { schemaContact } = require("../../tools/schema");
+const { validateContact } = require("../../tools/validation");
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router.put("/:contactId", validateContact(schemaContact), controller.update);
 
 router.patch(
   "/:contactId/favorite",
-  validateStatus(schemaStatus),
+  validateContact(schemaContact),
 
   controller.updateFavorite
 );
