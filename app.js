@@ -1,6 +1,9 @@
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
+require("dotenv").config();
+const mongoose = require("mongoose");
+mongoose.Promise = global.Promise;
 
 const contactsRouter = require("./routes/api/contacts");
 
@@ -24,4 +27,11 @@ app.use((err, req, res, next) => {
     .json(err.message || { message: "Server Internal Error" });
 });
 
-module.exports = app;
+const uriDb = process.env.DB_HOST;
+
+const connection = async () =>
+  mongoose.connect(uriDb, {
+    useUnifiedTopology: true,
+  });
+
+module.exports = { app, connection };

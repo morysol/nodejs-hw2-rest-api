@@ -1,13 +1,13 @@
-const schema = require("./schema");
-
-function validateContact(req, res, next) {
-  const { error } = schema.validate(req.body);
-
-  if (error) {
-    next(res.status(400).json({ message: "missing fields" }));
-  } else {
-    next();
-  }
+function validateContact(schema) {
+  return function (req, res, next) {
+    const { error } = schema.validate(req.body);
+    if (error) {
+      error.status = 400;
+      next(error);
+    } else {
+      next();
+    }
+  };
 }
 
-module.exports = validateContact;
+module.exports = { validateContact };

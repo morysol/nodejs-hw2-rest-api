@@ -1,5 +1,16 @@
-const app = require("./app");
+require("dotenv").config();
 
-app.listen(3000, () => {
-  console.log("Server running. Use our API on port: 3000");
-});
+const { app, connection } = require("./app");
+const PORT = process.env.PORT || 3000;
+
+connection()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running. Use our API on port: ${PORT}`);
+      console.log("Database connection successful");
+    });
+  })
+  .catch((err) => {
+    console.log(`Server not running. Error message: ${err.message}`);
+    process.exit(1);
+  });
