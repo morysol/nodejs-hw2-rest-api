@@ -22,4 +22,24 @@ const schemaStatus = Joi.object({
   favorite: Joi.boolean(),
 });
 
-module.exports = { schemaContact, schemaStatus };
+const schemaRegister = Joi.object({
+  email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net"] },
+    })
+    .required(),
+  password: Joi.string().min(6).required(),
+});
+
+const schemaLogin = Joi.object({
+  email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net"] },
+    })
+    .required(),
+  password: Joi.string().min(6).required(),
+});
+
+module.exports = { schemaContact, schemaStatus, schemaRegister, schemaLogin };
