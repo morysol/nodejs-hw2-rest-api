@@ -2,6 +2,10 @@ const { Conflict, Unauthorized } = require("http-errors");
 const service = require("../../service/apiUsers");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const fs = require("fs/promises");
+const path = require("path");
+const Jimp = require("jimp");
+const gravatar = require("gravatar");
 
 const getCurrent = async (req, res) => {
   const { email, subscription } = req.user;
@@ -35,6 +39,10 @@ const register = async (req, res, next) => {
     const result = await service.createUser({
       email,
       password: hashedPassword,
+      avatarURL: gravatar.url(email, {
+        protocol: "https",
+        s: "100",
+      }),
     });
     const { subscription } = result;
     res.status(201).json({ user: { email, subscription } });
@@ -58,7 +66,7 @@ const login = async (req, res, next) => {
       throw new Unauthorized({ message: errMess });
     }
     const payload = { id: user._id };
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "24h" });
 
     const result = await service.updateToken(user._id, token);
 
@@ -71,9 +79,39 @@ const login = async (req, res, next) => {
   }
 };
 
+const patchAvatar = async (req, res, next) => {
+  const { email } = req.user;
+  const rootDir = path.dirname(process.argv[1]);
+  const publicDir = "public/avatars";
+  const { path: sourceImage, originalname } = req.file;
+  const destinationImage = path.join(
+    rootDir,
+    publicDir,
+    `${email}_${originalname}`
+  );
+
+  try {
+    Jimp.read(sourceImage)
+      .then((image) => {
+        return image.resize(250, 250).write(destinationImage);
+      })
+      .catch((error) => {
+        next(error);
+      });
+    await fs.unlink(sourceImage);
+
+    const { avatarURL } = await service.updateAvatar(email, destinationImage);
+
+    return res.status(200).json({ avatarURL });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getCurrent,
   logout,
   register,
   login,
+  patchAvatar,
 };
