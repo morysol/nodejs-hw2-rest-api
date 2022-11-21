@@ -21,4 +21,19 @@ const updateToken = async (id, token) => {
   return updatedStatus || null;
 };
 
-module.exports = { findUser, createUser, updateToken };
+const updateAvatar = async (email, avatarURL) => {
+  const updated = await User.findOneAndUpdate(
+    { email },
+    { $set: { avatarURL: avatarURL } },
+    { new: true }
+  );
+
+  return updated;
+};
+
+module.exports = {
+  findUser,
+  createUser,
+  updateToken,
+  updateAvatar,
+};
