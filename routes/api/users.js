@@ -16,5 +16,7 @@ router.get("/login", validate(schemaLogin), controller.login);
 //
 router.patch("/avatar", auth, upload.single("image"), controller.patchAvatar);
 //
+router.get("/verify/:verificationToken", controller.verifyEmail);
+router.post("/verify", controller.verifyAgain);
 
 module.exports = router;
