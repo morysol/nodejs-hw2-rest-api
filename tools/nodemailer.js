@@ -1,4 +1,7 @@
 const nodemailer = require("nodemailer");
+require("dotenv").config();
+const user = process.env.USER_NAME;
+const pass = process.env.USER_PASSWORD;
 
 const sendRegisterEmail = async ({
   email = "cepera.cMupHoB@gmail.com",
@@ -8,8 +11,8 @@ const sendRegisterEmail = async ({
     host: "smtp.mailtrap.io",
     port: 2525,
     auth: {
-      user: "563316d5f31946", // TODO: move to .env
-      pass: "9b3ffb2ea43223",
+      user,
+      pass,
     },
   });
 

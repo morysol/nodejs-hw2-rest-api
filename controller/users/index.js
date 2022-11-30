@@ -64,16 +64,7 @@ const verifyEmail = async (req, res, next) => {
 const verifyAgain = async (req, res, next) => {
   try {
     const { email } = req.body;
-    if (!email) {
-      throw new BadRequest({
-        ResponseBody: {
-          message: "missing required field email",
-        },
-      });
-    }
-
     const user = await service.findUser({ email });
-
     if (!user) {
       throw new NotFound({
         ResponseBody: {

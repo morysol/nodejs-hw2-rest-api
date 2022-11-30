@@ -1,6 +1,7 @@
 const express = require("express");
 const controller = require("../../controller/users");
 const auth = require("../../middleware/auth");
+const emailVerify = require("../../middleware/emailVerify");
 const { tryCatchWrapper } = require("../../tools/wrapper");
 const { schemaRegister, schemaLogin } = require("../../tools/schema");
 const { validate } = require("../../tools/validation");
@@ -17,6 +18,6 @@ router.get("/login", validate(schemaLogin), controller.login);
 router.patch("/avatar", auth, upload.single("image"), controller.patchAvatar);
 //
 router.get("/verify/:verificationToken", controller.verifyEmail);
-router.post("/verify", controller.verifyAgain);
+router.post("/verify", emailVerify, controller.verifyAgain);
 
 module.exports = router;
