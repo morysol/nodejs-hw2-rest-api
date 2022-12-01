@@ -19,6 +19,7 @@ const auth = async (req, res, next) => {
     if (!user || !user.token) {
       throw new Unauthorized("Not authorized");
     }
+
     next();
   } catch (error) {
     if (error.message === "Invalid signature") {

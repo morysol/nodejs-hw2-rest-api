@@ -31,9 +31,20 @@ const updateAvatar = async (email, avatarURL) => {
   return updated;
 };
 
+const verifyUserEmail = async (user) => {
+  const { id } = user;
+  const verified = await User.findByIdAndUpdate(
+    id,
+    { $set: { verify: true } },
+    { new: true }
+  );
+  return verified;
+};
+
 module.exports = {
   findUser,
   createUser,
   updateToken,
   updateAvatar,
+  verifyUserEmail,
 };

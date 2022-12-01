@@ -1,4 +1,4 @@
-const { Conflict, Unauthorized } = require("http-errors");
+const { Conflict, Unauthorized, NotFound, BadRequest } = require("http-errors");
 const service = require("../../service/apiUsers");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -6,6 +6,9 @@ const fs = require("fs/promises");
 const path = require("path");
 const Jimp = require("jimp");
 const gravatar = require("gravatar");
+const { v4: uuidv4 } = require("uuid");
+//
+const { sendRegisterEmail } = require("../../tools/nodemailer");
 
 const getCurrent = async (req, res) => {
   const { email, subscription } = req.user;
@@ -27,9 +30,74 @@ const logout = async (req, res, next) => {
 
 const { SECRET_KEY } = process.env;
 
+const verifyEmail = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+    const user = await service.findUser({ verificationToken });
+    if (!user) {
+      throw new NotFound({
+        ResponseBody: {
+          message: "User not found",
+        },
+      });
+    }
+    if (user && !user.verify) {
+      await service.verifyUserEmail(user);
+      return res.status(200).json({
+        ResponseBody: {
+          message: "Verification successful",
+        },
+      });
+    }
+    if (user.verify) {
+      return res.status(200).json({
+        ResponseBody: {
+          message: "Already verified",
+        },
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+const verifyAgain = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await service.findUser({ email });
+    if (!user) {
+      throw new NotFound({
+        ResponseBody: {
+          message: "User not found",
+        },
+      });
+    }
+    if (user && !user.verify) {
+      const { verificationToken } = user;
+
+      await sendRegisterEmail({ email, verificationToken });
+      return res.status(200).json({
+        ResponseBody: {
+          message: "Verification email sent",
+        },
+      });
+    }
+    if (user.verify) {
+      throw new BadRequest({
+        ResponseBody: {
+          message: "Verification has already been passed",
+        },
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 const register = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const verificationToken = uuidv4();
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
     const user = await service.findUser({ email });
@@ -43,8 +111,11 @@ const register = async (req, res, next) => {
         protocol: "https",
         s: "100",
       }),
+      verificationToken,
     });
     const { subscription } = result;
+    //
+    await sendRegisterEmail({ email, verificationToken });
     res.status(201).json({ user: { email, subscription } });
   } catch (error) {
     next(error);
@@ -59,6 +130,10 @@ const login = async (req, res, next) => {
     const user = await service.findUser({ email });
     if (!user) {
       throw new Unauthorized({ message: errMess });
+    }
+
+    if (!user.verify) {
+      throw new Unauthorized({ message: "Authorization required" });
     }
 
     const isPassOk = await bcrypt.compare(password, user.password);
@@ -114,4 +189,6 @@ module.exports = {
   register,
   login,
   patchAvatar,
+  verifyEmail,
+  verifyAgain,
 };
